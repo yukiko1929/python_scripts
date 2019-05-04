@@ -1,0 +1,5 @@
+print('kiko')
+
+if 3 > 0:
+    print('yuki')
+    print('yumi')
