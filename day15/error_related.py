@@ -1,0 +1,22 @@
+# from urllib import request
+# from urllib import error
+#
+# url1 = 'http://127.0.0.1/yukiko'
+# url2 = 'http://127.0.0.1/ban'
+#
+# try:
+#     r1 = request.urlopen(url1)
+# except error.HTTPError as e:
+#     print('error:', e)
+#
+# try:
+#     r2 = request.urlopen(url2)
+# except error.HTTPError as e:
+#     print('error:', e)
+
+from urllib import request
+
+url = 'http://www.baidu.com/web?query='
+cont = request.quote('藤井友纪')
+print(url + cont)
+
