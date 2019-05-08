@@ -1,0 +1,6 @@
+[dbservers]
+node15
+
+[webservers]
+node18
+node19

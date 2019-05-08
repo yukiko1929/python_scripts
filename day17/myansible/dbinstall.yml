@@ -1,0 +1,14 @@
+---
+- name: dbserver deployment
+  hosts: dbservers
+  tasks: 
+    - name: mariadb installation
+      yum: 
+        name: mariadb-server
+        state: installed
+
+    - name: start service
+      service: 
+        name: mariadb
+        state: started
+        enabled: yes

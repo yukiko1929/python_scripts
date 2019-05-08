@@ -1,0 +1,11 @@
+---
+- name: deploy yum repository
+  hosts: all
+  tasks: 
+    - name: copy yum file
+      copy:
+        src: /root/Centos.repo
+        dest: /etc/yum.repos.d/Centos.repo
+        owner: root
+        group: root
+        mode: 0644
