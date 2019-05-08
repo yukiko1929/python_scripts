@@ -1,0 +1,163 @@
+while-else语句：
+在python中，循环也有else，如果循环是被break中断的，else就不执行了，否则执行
+
+
+range函数
+>>> range(10)   # 只提供一个数字，生成的数字将从0开始，10不包含
+range(0, 10)
+>>> for i in range(10):
+...     print(i)
+>>> list(range(10))   # 生成列表
+>>> list(range(6, 10))     # [6, 7, 8, 9]
+>>> list(range(1, 10, 2))  # [1, 3, 5, 7, 9]
+>>> list(range(10, 0, -1))  # [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
+
+
+列表解析：生成列表的方法
+>>> [10]
+[10]
+>>> [10 + 5]
+[15]
+>>> [10 + 5 for i in range(5)]  # 由循环条件决定10+5计算几次
+[15, 15, 15, 15, 15]
+>>> [10 + 5 for i in range(1, 6)]
+[15, 15, 15, 15, 15]
+>>> [10 + i for i in range(1, 6)]
+[11, 12, 13, 14, 15]
+>>> [10 + i for i in range(1, 6) if i % 2 == 1]  # 满足判断条件为真才保留
+[11, 13, 15]
+
+>>> ['192.168.1.%s' % 1]
+>>> ['192.168.1.%s' % 1 for i in range(1, 10)]
+>>> ['192.168.1.%s' % i for i in range(1, 255)]
+
+>>> result = 0
+>>> for i in range(1, 101):
+...     result += i
+...
+>>> print(result)
+5050
+
+>>> result = 0
+>>> for i in range(1, 101, 2):
+...     result += i
+...
+>>> print(result)
+2500
+
+
+文件对象：
+1、操作步骤：打开、读写、关闭
+2、打开文件相当于是在磁盘上找到文件的存储位置，返回文件对象
+3、打开模式
+r: 读。不支持写入，文件不存在报错。
+w: 写。不支持读取；文件不存在则创建，文件已存在，将会清空！！！
+a: 追加。在文件结尾写入数据。
+r+/w+/a+: 读写方式打开。
+b: 以bytes方式打开(直接显示为2进制的方式)
+4、读取文本文件的内容
+(1) read 默认读取文件的全部内容
+[root@room8pc16 day03]# cp /etc/passwd /tmp/
+>>> f = open('/tmp/passwd')
+>>> data = f.read()
+>>> data   # 每一行的结尾是\n
+>>> print(data)   # 将会把\n解释为回车
+# 文件读取时，文件指针会向后移动，读取全部内容后文件指针已经到结尾，再读就没有内容了
+>>> data = f.read()
+>>> data
+''
+>>> f.close()
+
+>>> f = open('/tmp/passwd')
+>>> f.read(4)   # 指定读取字节数
+'root'
+>>> f.read(4)   # 继续向后读
+':x:0'
+(2) readline   读一行
+>>> f.readline()
+':0:root:/root:/bin/bash\n'
+(3) readlines   读所有行，放到列表中
+>>> f.readlines()
+>>> f.close()
+
+(4) 通过for进行遍历，常用，需要背
+>>> f = open('/tmp/passwd')
+>>> for line in f:
+...     print(line, end='')
+>>> f.close()
+
+5、读取非文本文件
+>>> f = open('hole.jpeg')
+>>> f.read(4)
+# 报错。默认情况下，文件将被认为是文本文件，python试图将取出的4字节转换成文字
+# 因为是图片文件，无法转成文字，所以报错
+>>> f.close()
+#########################
+>>> f = open('hole.jpeg', 'rb')
+>>> f.read(4)
+b'\xff\xd8\xff\xe0'
+# \x表示16进制，一串01的组合表示起来不方便，所以python将这些2进制以16进制进行显示
+>>> f.close()
+注意：(1)read读取一般可以读取4096字节，正好为1个block大小
+     (2)文本文件也可以以rb方式打开
+
+6、写入
+>>> f = open('/tmp/passwd', 'w')
+>>> f.write('hello world!\n')
+[root@room8pc16 day03]# cat /tmp/passwd
+此时文件中无内容。因为数据写到缓存了，数据达到4K才会写一次磁盘。
+>>> f.flush()
+[root@room8pc16 day03]# cat /tmp/passwd
+>>> f.writelines(['2nd line.', '3rd line.\n'])
+>>> f.close()   # 关闭文件，数据也将写入磁盘
+[root@room8pc16 day03]# cat /tmp/passwd
+
+7、with子句：语句结束，文件自动关闭
+>>> with open('/tmp/passwd') as f:
+...     f.readline()
+...
+'hello world!\n'
+>>> f.readline()   # 报错，因为文件已经关闭，不能再读取了
+
+
+8、文件指针
+>>> f = open('/tmp/passwd', 'rb')
+>>> f.tell()   # 0  文件指针位置
+>>> f.read(5)
+>>> f.tell()   # 5
+seek函数用于移动文件指针，它接受两个参数，第二个参数表示相对位置（0表示开头，1
+表示当前位置，2表示结尾），第一个参数是相对于第二个参数的偏移量
+>>> f.seek(0, 0)   # 移动文件指针到开头
+>>> f.read(5)
+>>> f.seek(3, 1)   # 从当前位置向向移动3字节
+>>> f.readline()
+b'rld!\n'
+>>> f.seek(-6, 2)   # 把指针移动到结尾前6字节处
+>>> f.read()
+>>> f.close()
+
+
+函数：将一组代码起个名
+>>> def pstar():   # 定义函数，函数内的代码不会执行
+...     print('*' * 30)
+
+>>> pstar   # 在解释器中将会显示函数在内存中的位置
+>>> pstar()   # 调用函数需要使用()，函数内的代码将会执行
+
+函数执行的结果应该通过return进行返回，函数需要的数据应该通过参数传递
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

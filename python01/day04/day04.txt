@@ -1,0 +1,218 @@
+python官方手册：https://docs.python.org/zh-cn/3/
+
+
+1、文件是python从物理上组织代码的形式， 如  mymodule.py
+2、模块：是python从逻辑上组织代码的形式，如 mymodule
+
+__name__: 在每个python文件中都有一个自带的变量叫__name__
+__name__的值：__main__或模块名
+当模块文件直接运行时，__name__的值是__main__
+当模块被其他文件import导入时__name__的值是它的模块名
+
+[root@room8pc16 day04]# cat foo.py
+print(__name__)
+[root@room8pc16 day04]# cat bar.py
+import foo
+[root@room8pc16 day04]# python3 foo.py
+__main__
+[root@room8pc16 day04]# python3 bar.py
+foo
+
+
+
+shutil: shell工具
+1、shutil.copyfileobj()：用于拷贝文件对象
+>>> import shutil
+>>> fobj1 = open('/etc/issue', 'rb')
+>>> fobj2 = open('/tmp/issue', 'wb')
+>>> shutil.copyfileobj(fobj1, fobj2)
+>>> fobj1.close()
+>>> fobj2.close()
+2、shutil.copy() 拷贝文件，背
+>>> shutil.copy('/etc/issue.net', '/tmp')
+3、shutil.copy2()   # 相当于是cp -p
+4、shutil.move()    # mv，背
+>>> shutil.move('/tmp/issue.net', '/var/tmp')
+5、shutil.rmtree()   # rm -rf，但是只能删目录，不能删文件，背
+>>> shutil.copytree('/etc/security', '/tmp/anquan')  # 拷贝目录
+>>> shutil.rmtree('/tmp/anquan')
+
+
+
+常用语法：
+>>> x = y = 10
+>>> a, b = 10, 20
+>>> aa, bb = (10, 20)
+>>> aaa, bbb = [10, 20]
+>>> a, b = b, a  # 互换a和b的值
+>>> import keyword
+>>> keyword.kwlist
+>>> keyword.iskeyword('pass')
+
+模块布局
+#!/usr/bin/env python 	 #起始行
+“this is a test module”	  #模块文档字符串
+
+import sys   #导入模块
+import os
+
+debug = True #全局变量声明
+
+class FooClass(object):	  	#类定义
+'Foo class'
+	pass
+
+def	test():	 	 #函数定义
+    "test funcDon"
+	foo	= FooClass()
+
+if __name__	== ‘__main__’:	 #程序主体
+    test()
+
+
+
+编程思路：
+1、弄清要求
+2、发呆：思考程序是怎么运行的（交互的、非交互的？），如果是交互的脑补程序运行有什么
+提示，用户输入什么数据……
+   文件名：/etc/hosts
+   文件已存在，请重试
+   文件名：/tmp/myfile
+   请输入文件内容，在单独的一行输入end表示结束
+   > hello world!
+   > ni hao
+   > end
+3、思考程序有哪些功能，把这些功能写成函数
+    获取文件名、获取文件内容、写文件
+4、编写主程序，调用各个功能函数
+    先调用获取文件名的函数，再调用获取文件内容的函数，最后调用写文件的函数
+5、最后编写每个功能函数
+
+
+>>> alist = ['tom', 'bob', 'jerry', 'alice']
+>>> list(reversed(alist))   # 翻转，但是列表本身不变
+>>> alist.reverse()   # 列表本身也有翻转方法，改变列表本身
+>>> sorted(alist)   # 排序，但是列表本身不变
+>>> alist.sort()    # 列表本身也有排序，改变列表本身
+
+
+>>> ord('a')   # 查询a的ASCII码值
+97
+>>> ord('A')
+65
+>>> 'a' > 'A'
+True
+
+
+字符串格式化
+1、基础样式
+>>> '' % ()
+2、当引号中只有一个占位符，后面的()可以不写
+>>> '%s' % 'bob'
+3、其他用法
+>>> '%s is %s years old' % ('bob', 20)
+>>> '%s is %d years old' % ('bob', 20)
+>>> '%10s%8s' % ('name', 'age')  # name点10个宽度，age占8个宽度
+'      name     age'
+>>> '%10s%8s' % ('tom', 20)
+'       tom      20'
+>>> '%-10s%-8s' % ('name', 'age')  # %-10s  表示左对齐
+'name      age     '
+>>> '%-10s%-8s' % ('tom', 20)
+'tom       20      '
+4、以下为了解
+>>> '%#o' % 10   # 8进制
+'0o12'
+>>> '%#x' % 10   # 16进制
+'0xa'
+>>> '%f' % (5 / 3)
+'1.666667'
+>>> '%5.2f' % (5 / 3)   # 总宽度为5，小数点占2位
+' 1.67'
+>>> '%+d' % 10   # 正数前加+号
+'+10'
+>>> '%+d' % -10  # 负数就是负号
+'-10'
+
+字符串格式化还可以用format方法
+>>> '{} is {} years old'.format('bob', 20)
+>>> '{1} is {0} years old'.format(20, 'bob')
+'bob is 20 years old'
+>>> '{1:<10}:{0:<8}'.format(20, 'bob')  # 位置1的bob左对齐点10个宽度
+'bob       :20      '
+
+
+
+python可以使用subprocess模块调用系统命令
+>>> import subprocess
+>>> rc = subprocess.run('id root', shell=True)
+>>> rc.returncode  # retruncode就是shell中的$?
+
+
+
+
+原始字符串
+>>> win_path = 'c:\temp'
+>>> print(win_path)
+c:	emp
+>>> win_path = 'c:\\temp'
+>>> print(win_path)
+c:\temp
+>>> wpath = r'c:\temp'  # 原始字符串，字符串中的字符是本身含义
+>>> print(wpath)
+c:\temp
+>>> wpath
+'c:\\temp'
+
+
+字符串常用方法：
+1、去除空白字符
+>>> s1 = '  hello world\n'   # 去除两端空白字符
+>>> s1.strip()
+'hello world'
+>>> s1.lstrip()   # 去除左边空白字符
+'hello world\n'
+>>> s1.rstrip()
+'  hello world'
+2、切割字符
+>>> s2 = 'hello world ni hao'
+>>> s2.split()
+['hello', 'world', 'ni', 'hao']
+>>> s3 = 'hello-world-ni-hao'
+>>> s3.split()
+['hello-world-ni-hao']
+>>> s3.split('-')
+['hello', 'world', 'ni', 'hao']
+3、拼接字符
+>>> slist = ['hello', 'world', 'ni', 'hao']
+>>> ' '.join(slist)
+'hello world ni hao'
+>>> '---'.join(slist)
+'hello---world---ni---hao'
+4、对齐
+>>> s2.center(50)
+'                hello world ni hao                '
+>>> s2.center(50, '-')
+'----------------hello world ni hao----------------'
+>>> s2.rjust(50, '-')
+'--------------------------------hello world ni hao'
+>>> s2.ljust(50, '-')
+'hello world ni hao--------------------------------'
+5、判断开头、结尾
+>>> s2.startswith('h')
+True
+>>> s2.startswith('he')
+True
+>>> s2.endswith('?')
+False
+
+
+
+
+
+
+
+
+
+
+
