@@ -1,0 +1,141 @@
+>>> os.getcwd()   # pwd
+>>> os.mkdir('/tmp/demo')   # mkdir
+>>> os.makedirs('/tmp/aaa/bbb/ccc')   # mkdir -p
+>>> os.chdir('/tmp/demo')   # cd
+>>> os.listdir()    # ls
+>>> os.mknod('mytest')   # touch mytest
+>>> os.symlink('/etc/hosts', 'zhuji')   # ln -s
+>>> os.unlink('zhuji')   # 删除软链接
+>>> os.remove('mytest')  # rm -f
+
+>>> os.path.isfile('/etc/hosts')  # [ -f /etc/hosts ]
+>>> os.path.isdir('/etc/ho')    # [ -d /etc/ho ]
+>>> os.path.islink('/etc/hosts')   # 是软链接吗
+>>> os.path.exists('/etc')   # [ -e /etc ]
+>>> os.path.split('/etc/sysconfig/network')
+>>> os.path.join('/etc/sysconfig', 'network')
+>>> os.path.getsize('/etc/passwd')   # 获取文件大小
+
+
+pickle模块：
+>>> f = open('/tmp/abc', 'w')
+>>> f.write('hello world!\n')
+>>> f.write(100)   # 不能写入数字，只能是str
+>>> f.write({'name': 'bob', 'age': 20})   # 不能写入
+>>> f.close()
+
+
+>>> import pickle
+>>> f = open('/tmp/myfile', 'wb')
+>>> shop_list = ['apple', 'egg', 'pear']
+>>> pickle.dump(shop_list, f)
+>>> f.close()
+
+>>> with open('/tmp/myfile', 'rb') as fobj:
+...     mylist = pickle.load(fobj)
+...
+>>> type(mylist)
+<class 'list'>
+>>> mylist
+['apple', 'egg', 'pear']
+
+
+记账：
+[
+    ['2019-04-16', 0, 0, 10000, 'init'],
+    ['2019-04-16', 0, 300, 9700, 'buy shoes']
+]
+
+
+>>> def myfunc(name, age=23):
+...     pass
+函数中的name就被称作位置参数，age被称作关键字参数
+
+>>> def get_info(name, age):
+...     print('%s is %s years old' % (name, age))
+>>> get_info()   # error，参数个数不足
+>>> get_info('tom', 20, 30)   # error, 参数个数太多
+>>> get_info('tom', 20)   # OK
+>>> get_info(20, 'tom')   # OK，但是语义不对
+>>> get_info(age=20, name='tom')   # OK
+>>> get_info(age=20, 'tom')  # error, 位置参数必须在关键字参数前
+>>> get_info(20, name='tom')  # error, name得到了多个值
+>>> get_info('tom', age=20)  # OK
+
+
+在序列对象前面加*，将会把它拆开
+>>> print(*'abc')
+a b c
+>>> print(*[10, 20, 30])
+10 20 30
+>>> print(*(10, 20, 30))
+10 20 30
+
+在字典前加两个星号，表示把字典拆成关键字参数
+>>> def info(name, age):
+...     print('%s: %s' % (name, age))
+...
+>>> info(**{'name': 'tom', 'age': 20})
+tom: 20
+>>> info(name='tom', age=20)
+tom: 20
+
+
+匿名函数：隐藏名称的函数、没有名字的函数
+
+
+
+>>> x = 10  # 全局变量从定义开始，到程序结束一直可见可用
+>>> def foo():
+...     print(x)
+...
+>>> foo()
+10
+>>> def foo():
+...     x = 'hello'   # 局部也有变量x，它将会把全局的x遮盖住
+...     print(x)
+>>> foo()
+hello
+>>> x  # 全局变量没有改变
+10
+>>> def foo():
+...     global x   # 声明，此处的x使用的是全局的x
+...     x = 10000  # 将全局变量x的值修改为10000
+...     print(x)
+...
+>>> foo()
+10000
+>>> x
+10000
+
+
+偏函数：改造现有函数，生成新函数
+>>> def add(a, b, c, d, e):
+...     return a + b + c + d + e
+>>> add(10, 20, 30, 40, 5)
+105
+>>> add(10, 20, 30, 40, 6)
+106
+>>> add(10, 20, 30, 40, 13)
+113
+>>> from functools import partial
+>>> myadd = partial(add, 10, 20, 30, 40)  # 改造add函数，将前4个参数固定值
+>>> myadd(5)  # 5传递给最后一个参数，因为前4个已经设置值了
+105
+>>> myadd(7)
+107
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

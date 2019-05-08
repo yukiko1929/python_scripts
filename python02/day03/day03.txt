@@ -1,0 +1,183 @@
+5!=5x4x3x2x1
+
+5!=5x4!
+5!=5x4x3!
+5!=5x4x3x2!
+5!=5x4x3x2x1!
+
+快速排序：
+nums = [32, 19, 68, 69, 10, 46, 21, 71, 88, 76]
+1、假定第一个值是中间值
+>>> middle = nums[0]
+2、依次取出剩余数据，比middle小的放到一个列表中，比它大的放到另一个列表中
+>>> smaller = [19, 10, 21]
+>>> larger = [68, 69, 46, 71, 88, 76]
+3、将smaller、middle、larger拼接起来
+>>> smaller + [middle] + larger
+4、采用相同的方法对smaller和larger继续进行排序
+5、如果列表长度为0或1就不用排序了，直接将它返回即可
+
+
+
+生成器：生成器本质上是一个函数。常规函数就算存在多个return，也只能return一次；但
+是生成器，可以用yield生成并返回很多中间结果。
+>>> def my_gen():
+...     yield 'hello world'
+...     num = 10 + 5
+...     yield num
+...     yield 100
+>>> a = my_gen()
+>>> a.__next__()
+'hello world'
+>>> a.__next__()
+15
+>>> a.__next__()
+100
+>>> a.__next__()   # 生成器取值完成后，再取值将会发生异常
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+StopIteration
+>>> mg = my_gen()
+>>> for item in mg:
+...     print(item)
+
+
+1、模块导入的时候，将会在sys.path定义的位置下搜索模块
+>>> sys.path
+['', '/usr/local/lib/python36.zip', '/usr/local/lib/python3.6', '/usr/local/lib/python3.6/lib-dynload', '/usr/local/lib/python3.6/site-packages']
+说明，''空字符串表示当前目录
+2、如果希望自己编写的模块也能在任意位置被导入：
+(1) 把模块文件拷贝到site-packages/目录下
+(2) 使用PYTHONPATH环境变量定义
+[root@room8pc16 tmp]# export PYTHONPATH=/var/ftp/nsd_2018/nsd1811/python02/day03
+
+3、模块导入方法
+>>> import time
+>>> from random import randint, choice
+>>> import pickle as p   # 导入模块时，起别名
+>>> import os, sys, random   # 不推荐
+
+4、目录可以当作特殊的模块，称为包
+[root@room8pc16 day03]# mkdir mypack
+[root@room8pc16 day03]# vim mypack/hi.py
+hello = 'hello world'
+
+def pstar():
+    print('*' * 30)
+>>> import mypack.hi
+>>> mypack.hi.hello
+'hello world'
+>>> mypack.hi.pstar()
+******************************
+5、如果使用的是python2，需要在目录下创建__init__.py，否则不能成为包
+
+
+哈希：hash。是一种单向加密的算法。可以理解为将原始数据生成一串固定长度的乱码，
+只要原始数据相同，生成的乱码一定是相同的；即使原始数据有微小的变化，生成的乱码
+也会完全不一样。不能通过乱码反向推出原始数据。
+用途：
+(1) 存储加密的密码  # grep root /etc/shadow
+(2) 校验文件的完整性
+[root@room8pc16 day03]# cp /etc/passwd /tmp/mima
+[root@room8pc16 day03]# md5sum /etc/passwd /tmp/mima
+574e11b1a648bc9669b07015ead96f47  /etc/passwd
+574e11b1a648bc9669b07015ead96f47  /tmp/mima
+包括的算法有：md5/sha
+
+>>> import hashlib
+>>> m = hashlib.md5(b'123456')
+>>> m.hexdigest()
+'e10adc3949ba59abbe56e057f20f883e'
+
+>>> m1 = hashlib.md5()
+>>> m1.update(b'12')
+>>> m1.update(b'34')
+>>> m1.update(b'56')
+>>> m1.hexdigest()
+'e10adc3949ba59abbe56e057f20f883e'
+
+
+
+
+tarfile: tar包、压缩、解压缩
+>>> import os
+>>> import tarfile
+>>> os.chdir('/etc')
+>>> tar = tarfile.open('/tmp/mytest.tar.gz', 'w:gz')  # 使用gzip压缩
+>>> tar.add('/etc/hosts')  # 压缩文件、目录到目标文件中
+>>> tar.add('security')
+>>> tar.close()   # 关闭
+
+>>> os.mkdir('/tmp/mydemo')
+>>> tar = tarfile.open('/tmp/mytest.tar.gz', 'r:gz')
+>>> tar.extractall('/tmp/mydemo')  # 解压文件到指定目录
+>>> tar.close()
+
+
+备份程序：
+需要的数据：备份的目录、备份的目标目录、md5文件
+1、完全备份
+打包。目标文件名：security_full_20190420.tar.gz
+计算每个文件的md5值
+2、增量备份
+找出新增文件和改变的文件，并压缩。文件名：security_incr_20190421.tar.gz
+更新md5值
+
+递归列出目录下每个文件：
+>>> import os
+>>> result = list(os.walk('/tmp/mydemo/security'))
+>>> len(result)
+5
+>>> r1 = result[0]
+>>> len(r1)
+3
+>>> r2 = result[1]
+>>> len(r2)
+3
+>>> r1
+('/tmp/mydemo/security', ['console.apps', 'console.perms.d', 'limits.d', 'namespace.d'], ['access.conf', 'chroot.conf', 'console.handlers', 'console.perms', 'group.conf', 'limits.conf', 'namespace.conf', 'namespace.init', 'opasswd', 'pam_env.conf', 'sepermit.conf', 'time.conf', 'pwquality.conf'])
+>>> r2
+('/tmp/mydemo/security/console.apps', [], ['config-util', 'xserver', 'liveinst', 'setup'])
+>>> r1[0]
+'/tmp/mydemo/security'
+>>> r2[0]
+'/tmp/mydemo/security/console.apps'
+>>> r1[1]
+['console.apps', 'console.perms.d', 'limits.d', 'namespace.d']
+>>> r2[1]
+[]
+>>> r1[2]
+['access.conf', 'chroot.conf', 'console.handlers', 'console.perms', 'group.conf', 'limits.conf', 'namespace.conf', 'namespace.init', 'opasswd', 'pam_env.conf', 'sepermit.conf', 'time.conf', 'pwquality.conf']
+>>> r2[2]
+['config-util', 'xserver', 'liveinst', 'setup']
+
+os.walk()得到的每一项都是元组，每个元组由三项构成，这三项分别是：路径字符串、
+该路径下的目录列表、该目录下文件的列表
+>>> for path, folders, files in os.walk('/tmp/mydemo/security'):
+...     for file in files:
+...         os.path.join(path, file)
+
+
+
+生成器
+>>> def ipaddrs():
+...     for i in range(1, 6):
+...         yield '192.168.1.%s' % i
+>>> ips = ipaddrs()
+>>> ips
+<generator object ipaddrs at 0x7ff131aeaf68>
+>>> for ip in ips:
+...     print(ip)
+# 以上生成器函数，可以简化为以下一行
+>>> ipaddr2 = ('192.168.1.%s' % i for i in range(1, 6))
+>>> ipaddr2
+<generator object <genexpr> at 0x7ff131aeafc0>
+
+
+
+
+
+
+
+
+

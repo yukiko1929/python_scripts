@@ -1,0 +1,104 @@
+OOP:面向对象的编程
+
+鸟：name, 颜色，飞，进食
+
+bird = {'name': '神雕', 'color': '棕'}
+
+def fly():
+
+def eat():
+
+Class Bird:
+    name =
+    color =
+
+    def fly():
+
+    def eat():
+
+b1 = Bird(name=, color=)
+b1.fly()
+b2.eat()
+
+
+
+组合：两个类明显不同，但是一个类是另一个类的组件
+继承：子类可以继承父类的属性和方法
+
+
+magic：魔法方法，指的是那些__xxxx__这样的方法
+
+
+将mac地址改为通过冒号分开的样式
+192.168.1.1     000C29123456
+192.168.1.3     525400A9B321
+192.168.1.10    525400243D4A
+思路：
+1、先匹配到mac地址: 出现在结尾的12个任意字符
+2、将mac地址分成6组: 每两个字符用括号()分组
+3、在6组之间加上冒号: 替换时，\1表示第1个分组，\n表示第n个分组
+:%s/\(..\)\(..\)\(..\)\(..\)\(..\)\(..\)$/\1:\2:\3:\4:\5:\6/
+
+https://jex.im/regulex
+
+\<tom\> 匹配独立单词tom，如果是tommorrow就不能匹配了
+
+
+
+re模块：
+>>> import re
+>>> re.match('f..', 'food')  # 匹配到，返回匹配对象
+<_sre.SRE_Match object; span=(0, 3), match='foo'>
+>>> result = re.match('f..', 'seafood')
+>>> print(result)  # 没匹配到，返回None
+None
+>>> m = re.search('f..', 'seafood')   # 常用
+>>> m.group()   # 匹配对象的group方法获取匹配内容
+'foo'
+
+>>> re.findall('f..', 'seafood is food')
+['foo', 'foo']  # 返回所有匹配内容的列表
+>>> list(re.finditer('f..', 'seafood is food'))
+[<_sre.SRE_Match object; span=(3, 6), match='foo'>, <_sre.SRE_Match object; span=(11, 14), match='foo'>]
+finditer返回的是由匹配对象构成的生成器
+>>> result = re.finditer('f..', 'seafood is food')
+>>> for m in result:
+...     print(m.group())
+foo
+foo
+
+>>> re.split('-|\.', 'hello-world.tar.gz')
+['hello', 'world', 'tar', 'gz']
+>>> re.sub('X', 'Tom', 'Hi X. How are you X')
+'Hi Tom. How are you Tom'
+
+>>> m = re.search('f..', 'seafood')
+>>> patt = re.compile('f..')  # 把模式先编译，可提升效率，建议做法
+>>> m = patt.search('seafood')  # 编译后的对象也有search/findall等方法
+>>> m.group()
+'foo'
+
+
+贪婪匹配：默认情况下，*、+总是尽量多的匹配
+>>> m = re.search('.+(\d+)', 'his phone number is: 15011223345')
+>>> m.group()  # m.group()总是匹配全部的模式.+(\d+)
+'his phone number is: 15011223345'
+>>> m.group(1)   # 匹配第1个()中的内容
+'5'
+说明：.+是贪婪匹配，它尽可能匹配更多的内容，\d+至少需要一个数字，所以.+给\d+留了
+一个数字
+如果希望\d+能匹配更多的内容，使用?来取消贪婪匹配，让\d+匹配更多内容
+>>> m = re.search('.+?(\d+)', 'his phone number is: 15011223345')
+>>> m.group()
+'his phone number is: 15011223345'
+>>> m.group(1)
+'15011223345'
+
+
+
+
+
+
+
+
+

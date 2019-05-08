@@ -1,0 +1,188 @@
+列表：容器、顺序、可变
+>>> from random import randint
+>>> alist = [randint(1, 100) for i in range(10)]
+>>> alist.append(29)   # 追加
+>>> alist.index(38)    # 获取数字38的下标
+>>> alist.insert(5, 29)   # 在下标为5的位置插入29
+>>> alist.count(29)   # 统计29出现的次数
+>>> alist.reverse()   # 翻转列表
+>>> alist.sort()      # 排序
+>>> alist.remove(29)   # 删除第一个29
+>>> alist.pop()       # 弹出最后一项
+>>> alist.pop(4)      # 弹出下标是4的项
+>>> blist = alist.copy()   # 将alist的值赋值给blist
+>>> clist = alist      # alist和clist使用相同的地址空间
+>>> alist.extend(clist)   # 将clist的内容汇入到alist
+>>> alist.clear()     # 清空列表
+
+元组：相当于是不可变的列表，注意，单元素元组必须有逗号，否则不会成为元组
+>>> a = (10)
+>>> type(a)
+<class 'int'>
+>>> a
+10
+>>> b = (10, )
+>>> type(b)
+<class 'tuple'>
+>>> b
+(10,)
+
+
+模拟栈结构：
+1、运行方式
+    (0) 压栈
+    (1) 出栈
+    (2) 查询
+    (3) 退出
+    请选择(0/1/2/3): 2
+    []
+    (0) 压栈
+    (1) 出栈
+    (2) 查询
+    (3) 退出
+    请选择(0/1/2/3): 0
+    请输入内容: hello world!
+    (0) 压栈
+    (1) 出栈
+    (2) 查询
+    (3) 退出
+    请选择(0/1/2/3): 2
+    ['hello world!']
+    (0) 压栈
+    (1) 出栈
+    (2) 查询
+    (3) 退出
+    请选择(0/1/2/3): 1
+    从栈中弹出了: hello world!
+    (0) 压栈
+    (1) 出栈
+    (2) 查询
+    (3) 退出
+    请选择(0/1/2/3): 2
+    []
+    (0) 压栈
+    (1) 出栈
+    (2) 查询
+    (3) 退出
+    请选择(0/1/2/3): 3
+    Bye-bye
+2、框架
+3、具体代码
+
+
+
+字典：
+1、创建字典
+>>> adict = dict(['ab', ['name', 'tom'], ('age', 22)])
+dict的参数是个序列对象，序列中有三项，每一项又有两个项目，第一个项目是key，第二个是val
+>>> bdict = {}.fromkeys(['tom', 'jerry', 'bob'], 7)
+创建相同相同val的字典
+2、访问字典
+>>> for key in adict:
+...     print('%s: %s' % (key, adict[key]))
+3、字典赋值
+字典的key都是唯一的，不重复的。字典的key必须是不可变类型
+adict['name'] = 'jerry'  # name在字典里将修改它的val，否则新增加一项
+>>> adict['email'] = 'jerry@tedu.cn'
+4、字典方法
+>>> adict.get('name', 'not found') # 字典中有key, 返回jerry
+>>> qq = adict.get('qq')   # 字典中没有key为qq的项，默认返回None
+>>> print(qq)
+>>> adict.get('qq', 'not found')  # 字典中没有key为qq的项，返回not found
+>>> adict.keys()    # 所有的key
+>>> adict.values()    # 所有的val
+>>> adict.items()    # 所有的(key, val)组成的集合
+>>> adict.pop('a')   # 弹出key是a的项
+
+
+\r作用是回车不换行
+####################
+@###################
+#@##################
+##@#################
+###@################
+
+
+集合：由不同元素构成，元素必须是不可变对象
+>>> from random import randint
+>>> alist = [randint(1, 20) for i in range(20)]
+>>> aset = set(alist)
+集合也用{}表示，像是一个无值的字典，只有key，没有value
+>>> aset = set('abc')
+>>> bset = set('bcd')
+>>> aset | bset   # 并集
+>>> aset & bset   # 交集
+>>> aset - bset   # 差补，只在aset中存在的元素
+>>> aset.add('abc')   # 增加元素
+>>> aset.update('xyz')   # 批量添加元素
+>>> aset.update(['xxx', 'yyy', 'zzz'])
+>>> aset.remove('zzz')
+
+
+[root@room8pc16 day01]# cp /etc/passwd /tmp/
+[root@room8pc16 day01]# vim /tmp/passwd
+修改文件，使之与/etc/passwd不一样
+>>> with open('/etc/passwd') as f1:
+...     s1 = set(f1)   # 将文件的每一行作为集合的一项
+
+>>> with open('/tmp/passwd') as f2:
+...     s2 = set(f2)
+
+>>> s3 = s2 - s1
+>>> with open('/tmp/result.txt', 'w') as f3:
+...     f3.writelines(s3)
+[root@room8pc16 day01]# cat /tmp/result.txt
+
+时间表示方式：
+1、时间戳：距离1970-1-1 0:00:00之间的秒数
+>>> time.time()
+2、UTC时间：世界协调时
+>>> time.ctime()
+3、struct_time九元组
+>>> time.localtime()
+>>> t = time.localtime()
+>>> t.tm_year
+2019
+>>> t.tm_yday
+105
+
+需要掌握的时间方法
+>>> time.time()   # 时间戳
+>>> time.strftime('%Y-%m-%d %H:%M:%S')  # 显示特定样式
+# 将时间字符串转换成struct_time
+>>> time.strptime('2019-04-15 16:51:03', '%Y-%m-%d %H:%M:%S')
+>>> t1 = time.strptime('2019-04-15 16:51:03', '%Y-%m-%d %H:%M:%S')
+>>> t2 = time.localtime()
+>>> t1 > t2   # 时间比较
+>>> time.strftime('%a %A')
+'Mon Monday'
+>>> time.sleep(3)
+
+>>> from datetime import datetime
+>>> t1 = datetime.now()  # 年月日时分秒毫秒
+>>> t2 = datetime(2019, 4, 10)
+>>> t1 > t2   # True
+
+>>> from datetime import timedelta
+>>> days = timedelta(days=100, hours=10)
+>>> t1 - days  # 100天零10小时以后的时间
+datetime.datetime(2019, 1, 5, 7, 4, 5, 614541)
+>>> t1 + days
+datetime.datetime(2019, 7, 25, 3, 4, 5, 614541)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
