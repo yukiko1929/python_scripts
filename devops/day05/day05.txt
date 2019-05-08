@@ -1,0 +1,206 @@
+requests模块
+1、常用方法
+requests.get()
+requests.post()
+2、传递参数
+http://www.kuaidi100.com/query?type=shentong&postid=12345678
+url = 'http://www.kuaidi100.com/query'
+params = {'type': 'shengtong', 'postid': '12345678'}
+r = requests.get(url, params=params)
+3、传递post提交的数据，不会出现在url地址栏上
+url = 'http:/xxxx.xxxx.com'
+data = {'username': 'xxx', 'password': 'xxxxx'}
+r = requests.post(url, data=data)
+
+钉钉机器人：
+1、搜索 钉钉开放平台，找到开发者手册地址：
+https://open-doc.dingtalk.com/
+点击“移动应用接入”，再从右上角搜索“自定义机器人”
+2、在钉钉中创建一个群，添加群聊机器人，类型是webhook，
+将群聊机器人的webhook网址复制下来，这个是机器人聊天的授权地址
+
+
+
+zabbix编程
+1、编写监控插件
+# pip3 install psutil
+>>> import psutil
+>>> psutil.sensors_temperatures()
+>>> temps = psutil.sensors_temperatures()  # 返回字典
+# key是coretemp的val是列表，取出列表第一项是第一颗CPU的温度
+>>> cpu0_temp = temps['coretemp'][0]
+第一颗CPU的信息是个object，它有很多属性
+>>> print('%s: %s' % (cpu0_temp.label, cpu0_temp.current))
+
+>>> psutil.sensors_fans()  # 风扇信息
+
+2、zabbix官方手册
+https://www.zabbix.com/documentation/3.4/zh/manual
+找到19.API
+
+
+>>> class CPU:
+...     def __init__(self, core, temp):
+...         self.core = core
+...         self.temp = temp
+...     def __str__(self):
+...         return 'cpu_temp(core: %s, temp: %s)' % (self.core, self.temp)
+>>> c1 = CPU(0, 42)
+>>> print(c1)
+cpu_temp(core: 0, temp: 42)
+>>> c1.core
+0
+>>> c1.temp
+42
+
+
+adict = {'key1': [c1]}
+>>> print(adict['key1'][0])
+cpu_temp(core: 0, temp: 42)
+>>> mylist = adict['key1']
+>>> mylist[0]
+>>> print(mylist[0])
+cpu_temp(core: 0, temp: 42)
+
+
+
+zabbix api：
+示例zabbix地址是http://192.168.4.2/zabbix
+所以api地址是：http://192.168.4.2/zabbix/api_jsonrpc.php
+
+
+CI/CD: 持续集成/持续交付
+
+编译执行：C / go
+解释执行：python / php / shell
+
+jenkins: 实现CI
+下载、编译程序
+
+配置node4成为jenkins服务器
+1、node4.tedu.cn  eth0: 192.168.4.4   eth1:自动获得，连接default网络
+(1) node4的第二块网卡采连接到default网络
+(2) 删除virbr0网桥
+[root@node4 ~]# ifconfig virbr0 down
+[root@node4 ~]# brctl delbr virbr0
+(3) 配置IP
+[root@node4 ~]# LANG=C nmtui
+Edit a connection -> Add -> Ethernet -> Profile name: eth1; Device: eth1
+-> OK
+[root@node4 ~]# ifup eth1
+2、安装
+拷贝jenkins rpm包到node4
+[root@node4 ~]# rpm -ihv jenkins-2.138.2-1.1.noarch.rpm
+
+3、配置jenkins
+jenkins是java程序，需要安装java
+# yum install -y java
+[root@node4 ~]# systemctl start jenkins
+[root@node4 ~]# systemctl enable jenkins
+访问 http://192.168.4.4:8080
+按向导初始化。其中安装插件时，什么也不要选择。“选择插件来安装” -> “无”
+“创建第一个管理员”界面，选择右下角“使用admin账号登陆” -> 保存并完成
+进入管理页面后，点击右上角的admin -> 左侧的设置 -> 修改密码
+
+4、安装插件
+(1) 使用国内镜像
+首页 -> 系统管理 -> 插件管理 -> 高级 -> 升级站点:
+https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/update-center.json
+-> 提交
+(2) 安装插件
+可选插件 -> git parameter -> 直接安装 -> 安装完成后重启Jenkins(空闲时)
+(3) 在jenkins服务器上安装git
+[root@node4 ~]# yum install -y git
+
+(4)如果在线安装不上，可以先下载，下载网址是：
+http://updates.jenkins-ci.org/download/plugins/git-parameter/
+下载后，在首页 -> 系统管理 -> 插件管理 -> 高级 -> 上传插件
+
+
+上线流程：
+1、程序员编写代码
+[root@room8pc16 day05]# git init /tmp/myweb
+[root@room8pc16 day05]# cd /tmp/myweb
+[root@room8pc16 myweb]# echo '<h1>Hello World</h1>' > index.html
+[root@room8pc16 myweb]# git add .
+[root@room8pc16 myweb]# git commit -m "myweb version 1.0"
+[root@room8pc16 myweb]# git tag 1.0  # 标记此时的版本号为1.0版本
+[root@room8pc16 myweb]# git tag  # 查看版本
+1.0
+1.0开发完毕后，继续开发新版本
+[root@room8pc16 myweb]# echo '<h2>my web 2.0</h2>' >> index.html
+[root@room8pc16 myweb]# git add .
+[root@room8pc16 myweb]# git commit -m "my web 2.0"
+[root@room8pc16 myweb]# git tag 2.0  # 标记此时的版本号为2.0版本
+2、代码推送到gitlab服务器
+(1) 启动gitlab服务器
+(2) 在名为devops的group下创建项目myweb，可见等级为公开
+(3) 在myweb项目中授权用户是主程序员角色
+(4) 上传代码到gitlab服务器
+[root@room8pc16 myweb]# cd /tmp/myweb/
+# git remote rename origin old-origin
+如果出现以下报错，可以忽略
+error: 不能重命名配置小节 'remote.origin' 到 'remote.old-origin'
+# git remote add origin http://192.168.4.1/devops/myweb.git
+# git push -u origin --all   # 推送所有的确认
+# git push -u origin --tags  # 推送所有的tag
+
+3、jenkins拉取gitlab上的代码
+创建自由风格的软件项目 -> 参数化构建过程 -> 添加参数选git parameter
+-> name: webver, parameter type: tag, Default Value: origin/master
+-> 源码管理 -> Repository URL: http://192.168.4.1/devops/myweb.git
+-> Branches to build: $webver ->保存
+执行工程，拉取代码：Build with Parameters -> 选择1.0后构建
+-> 左下角的Build History，成功显示蓝球，失败是红球
+4、查看拉取下来的代码：
+[root@node4 ~]# ls /var/lib/jenkins/workspace/
+
+5、为了方便应用服务器从jenkins上把代码下载过去，在jenkins上安装apache，把
+从gitlab上拉取的代码放到apache中用于下载
+[root@node4 ~]# yum install -y httpd
+[root@node4 ~]# systemctl start httpd
+[root@node4 ~]# systemctl enable httpd
+6、创建apache目录
+/var/www/html/deploy: 存储版本文件
+/var/www/html/deploy/live_ver：最新版本文件
+/var/www/html/deploy/last_ver：前一个版本文件
+/var/www/html/deploy/packages/: 存储压缩后的软件包和它的md5值
+[root@node4 ~]# mkdir -p /var/www/html/deploy/packages/
+[root@node4 ~]# chown -R jenkins:jenkins /var/www/html/deploy/
+
+7、修改jenkins工程
+(1) 将check out的版本放到子目录中
+在源码管理下面，Additional Behaviours -> check out to a sub-directory
+-> Local subdirectory for repo: myweb-$webver
+# ls /var/lib/jenkins/workspace/myweb/
+(2) 将软件打包放到apache相关目录下
+构建 -> 增加构建步骤 -> 执行shell
+deploy_dir=/var/www/html/deploy
+cp -r myweb-$webver $deploy_dir/packages/
+cd $deploy_dir/packages
+rm -fr myweb-$webver/.git
+tar czf myweb-$webver.tar.gz myweb-$webver
+rm -rf myweb-$webver
+md5sum myweb-$webver.tar.gz | awk '{print $1}' > myweb-$webver.tar.gz.md5
+cd $deploy_dir
+[ -f live_ver ] && cat live_ver > last_ver
+echo $webver > live_ver
+
+
+在应用服务器上部署软件
+1、检查是否有新版本
+如果本地没有版本文件，或本地版本比jenkins上的版本低
+2、有新版本则下载相应的压缩包
+3、校验压缩包，检查下载的压缩包是否损坏
+4、如果压缩包没有损坏，则部署
+将压缩包解压到deploy目录下，创建到解压目录的链接
+5、路径规划
+/var/www/download/: 存储下载的压缩包和md5文件
+/var/www/deploy/: 存储live_ver和解压后的软件目录
+
+
+
+
+
+
+

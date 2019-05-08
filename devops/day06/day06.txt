@@ -1,0 +1,212 @@
+ansible
+1、安装
+(1) 在线
+# pip3 install ansible
+(2) 离线
+# cd ansible_pkg/
+# pip3 install *
+2、准备三台虚拟机，用于远程管理测试
+node4.tedu.cn  192.168.4.4
+node5.tedu.cn  192.168.4.5
+node6.tedu.cn  192.168.4.6
+(1) 在物理机上配置名称解析
+[root@room8pc16 ~]# for i in {1..254}
+> do
+> echo -e "192.168.4.$i\tnode$i.tedu.cn\tnode$i" >> /etc/hosts
+> done
+(2) 收集所有服务器的密钥
+[root@room8pc16 ~]# ssh-keyscan 192.168.4.{4..6} node{4..6} node{4..6}.tedu.cn >> ~/.ssh/known_hosts
+3、配置ansible工作环境
+[root@room8pc16 day06]# mkdir myansible
+[root@room8pc16 day06]# cd myansible
+[root@room8pc16 myansible]# vim ansible.cfg
+[defaults]
+inventory = hosts
+remote_user = root
+[root@room8pc16 myansible]# vim hosts
+[dbservers]
+node4.tedu.cn
+
+[webservers]
+node5.tedu.cn
+node6.tedu.cn
+测试
+[root@room8pc16 myansible]# ansible all -m ping -k
+
+4、通过playbook实现免密登陆、配置yum
+(1) 配置vim
+set ai   # 自动缩进
+set ts=4   # tab键是4空格
+set et   # 将tab转换成空格
+set encoding=utf8   # 字符编码
+autocmd FileType yaml setlocal sw=2 ts=2 et ai   # 只有yaml文件生效的配置
+(2) 编写playbook
+[root@room8pc16 myansible]# vim authkey.yml
+---
+- name: configure auth key
+  hosts: all
+  tasks:
+    - name: upload public key
+      authorized_key:
+        user: root
+        state: present
+        key: "{{ lookup('file', '/root/.ssh/id_rsa.pub') }}"
+(3) 检查语法
+[root@room8pc16 myansible]# ansible-playbook --syntax-check authkey.yml
+(4) 执行
+[root@room8pc16 myansible]# ansible-playbook authkey.yml -k
+
+(5) yum的playbook
+[root@room8pc16 myansible]# mkdir files
+[root@room8pc16 myansible]# vim files/server.repo
+[root@room8pc16 myansible]# vim yum.yml
+---
+- name: configure yum
+  hosts: all
+  tasks:
+    - name: upload yum repo file
+      copy:
+        src: files/server.repo
+        dest: /etc/yum.repos.d/server.repo
+[root@room8pc16 myansible]# ansible-playbook --syntax-check yum.yml
+[root@room8pc16 myansible]# ansible-playbook yum.yml
+
+配置lamp
+[root@room8pc16 myansible]# vim lamp.yml
+---
+- name: configure dbservers
+  hosts: dbservers
+  tasks:
+    - name: install mariadb
+      yum:
+        name: mariadb-server
+        state: latest
+    - name: start mariadb service
+      service:
+        name: mariadb
+        state: started
+        enabled: yes
+
+- name: configure webservers
+  hosts: webservers
+  tasks:
+    - name: install apache
+      yum:
+        name: [httpd, php, php-mysql]
+        state: present
+    - name: start httpd service
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+[root@room8pc16 myansible]# ansible-playbook --syntax-check lamp.yml
+[root@room8pc16 myansible]# ansible-playbook lamp.yml
+
+
+ansible编程
+https://docs.ansible.com/  -> Ansible Documentation搜索python api
+将example代码拷贝
+
+命名的元组：
+1、还是元组，具有元组的特性，执行元组相关的操作
+2、为元组的下标命名
+>>> from collections import namedtuple
+>>> Point = namedtuple('Point', ['x', 'y', 'z'])
+>>> a = Point(10, 15, 8)
+>>> len(a)
+3
+>>> a[0]
+10
+>>> a[1:]
+(15, 8)
+>>> a.x
+10
+>>> a.y
+15
+>>> a.z
+8
+
+
+yaml文件格式能够解释成python的数据类型，如把lamp.yml改为python数据类型如下：
+[
+    'name': 'configure dbservers',
+    'hosts': 'dbservers',
+    'tasks:
+        [
+            'name': 'install mariadb',
+            'yum': {
+                'name': 'mariadb-server',
+                'state': 'latest'
+            }
+        ],
+        [
+            'name': 'start mariadb'
+            'service': {
+                'name': 'mariadb',
+                'state': 'started',
+                'enabled': 'yes'
+            }
+        ]
+]
+
+
+
+编写ansible模块
+1、创建自定义模块路径
+[root@room8pc16 day06]# mkdir mylibraby
+# export ANSIBLE_LIBRARY=/var/ftp/nsd_2018/nsd1811/devops/day06/mylibraby
+# mylibraby/mycopy.py
+from ansible.module_utils.basic import AnsibleModule
+import shutil
+
+def main():
+    module = AnsibleModule(
+        argument_spec=dict(
+            yuan=dict(required=True, type='str'),
+            mudi=dict(required=True, type='str')
+        )
+    )
+    shutil.copy(module.params['yuan'], module.params['mudi'])
+    module.exit_json(changed=True)
+
+if __name__ == '__main__':
+    main()
+2、测试
+# ansible webservers -m mycopy -a "yuan=/etc/hosts mudi=/tmp/zhuji.txt"
+
+
+手工安装python模块
+1、在物理机上下载wget模块
+# pip download wget --trusted-host mirrors.163.com
+2、拷贝到远程
+# ansible webservers -m copy -a "src=files/wget-3.2.zip dest=/root"
+3、在远程主机上执行安装
+[root@node5 ~]# unzip wget-3.2.zip
+[root@node5 ~]# cd wget-3.2/
+[root@node5 wget-3.2]# python setup.py install
+
+
+ansible-cmdb: 将收集下来的主机信息以web形式展现
+1、收集主机信息
+[root@room8pc16 myansible]# # ansible all -m setup --tree /tmp/out/
+[root@room8pc16 myansible]# # ls /tmp/out/
+2、安装ansible-cmdb
+# cd ansible-cmdb_pkgs/
+[root@room8pc16 ansible-cmdb_pkgs]# pip3 install *
+[root@room8pc16 ~]# vim $(which ansible-cmdb)
+PY_BIN=$(which python3)   # 修改第8行
+[root@room8pc16 myansible]# # ansible-cmdb /tmp/out/ > /tmp/hosts.html
+[root@room8pc16 myansible]# firefox /tmp/hosts.html
+
+
+
+
+
+
+
+
+
+
+
+
+

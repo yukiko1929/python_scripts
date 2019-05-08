@@ -1,0 +1,173 @@
+>>> data = '中国'
+>>> type(data)
+<class 'str'>
+>>> help(data.encode)   # 发现默认的编码方式是utf8
+>>> data.encode()
+b'\xe4\xb8\xad\xe5\x9b\xbd'  # 转成utf8的二进制形式
+>>> data.encode('gbk')
+b'\xd6\xd0\xb9\xfa'    # 转成gbk的二进制形式
+>>> bdata = data.encode('gbk')
+>>> type(bdata)
+<class 'bytes'>
+>>> bdata.decode()   # bdata是gbk编码，默认decode用的是utf8，所以报错
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xd6 in position 0: invalid continuation byte
+>>> bdata.decode('gbk')   # 指定采用gbk的方式解码
+'中国'
+
+
+异常处理：
+http://127.0.0.1/abcd   不存在
+http://127.0.0.1/ban    没有权限
+
+
+URL编码
+在搜狗中搜索汉字 海军节，可以看到url中有汉字，把这部分内容复制到pycharm如下：
+https://www.sogou.com/web?query=\u6d77\u519b\u8282
+URL只允许一部分字符，汉字是不允许的字符。浏览器看到汉字，实际上是经过编码的，
+编程时，需要把这些字符先编码成允许的字符
+
+>>> from urllib import request
+>>> url = 'http://www.sogou.com/web?query=复联4'
+>>> request.urlopen(url)  # 报错，汉字不是URL允许的字符
+>>> request.quote('复联4')
+'%E5%A4%8D%E8%81%944'
+url = 'http://www.sogou.com/web?query=' + request.quote('复联4')
+>>> r = request.urlopen(url)
+
+
+
+
+
+paramiko
+1、安装
+(1)在线
+# pip3 install paramiko
+(2)离线
+# cd paramiko_pkgs/
+# pip3 install *
+2、准备用于远程管理的虚拟机
+node4.tedu.cn  192.168.4.4
+node5.tedu.cn  192.168.4.5
+node6.tedu.cn  192.168.4.6
+
+3、应用
+>>> import paramiko
+>>> ssh = paramiko.SSHClient()   # 创建客户端实例
+>>> ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # 相当于回答yes
+>>> ssh.connect('192.168.4.4', username='root', password='123456')
+>>> ssh.exec_command('mkdir /tmp/demo')
+>>> ssh.close()
+说明：exec_command()执行命令的返回值是个三元组，分别代表了输入、输出和错误
+每一个部分都是类文件对象，它们都有read()方法。
+
+
+邮件编程：
+1、准备邮件
+>>> from email.mime.text import MIMEText
+# 书写正文，邮件是纯文本
+>>> message = MIMEText('My email test.\r\n', 'plain', 'utf8')
+# 编写头部信息
+>>> from email.header import Header
+>>> message['From'] = Header('root', 'utf8')
+>>> message['To'] = Header('zhangsan', 'utf8')
+>>> message['Subject'] = Header('py mail test', 'utf8')
+2、发送邮件
+>>> import smtplib
+>>> smtp = smtplib.SMTP()
+>>> smtp.connect('127.0.0.1')
+>>> smtp.sendmail('root', ['root', 'zhangsan'], message.as_string())
+>>> smtp.close()
+# mail
+# su - zhangsan
+$ mail
+
+
+JSON: JavaScript Object Notation
+可以在网络上传输各种各样的数据类型
+>>> import json
+>>> adict = {'name': 'tom', 'age': 20}
+>>> json.dumps(adict)  # 将字典转换成json字符串
+'{"name": "tom", "age": 20}'
+>>> jdata = json.dumps(adict)
+>>> json.loads(jdata)   # 将json字符串转成字典
+{'name': 'tom', 'age': 20}
+
+天气预报：
+实况天气: http://www.weather.com.cn/data/sk/城市代码.html
+城市信息: http://www.weather.com.cn/data/cityinfo/城市代码.html
+详细指数: http://www.weather.com.cn/data/zs/城市代码.html
+搜索 中国天气网 城市代码 ，可以得到全国各地区的代码
+如：
+http://www.weather.com.cn/data/sk/101010100.html
+>>> from urllib import request
+>>> r = request.urlopen('http://www.weather.com.cn/data/sk/101010100.html')
+>>> data = r.read()
+>>> import json
+>>> json.loads(data)
+{'weatherinfo': {'city': '北京', 'cityid': '101010100', 'temp': '27.9', 'WD': '\u5357\u98ce', 'WS': '\u5c0f\u4e8e3\u7ea7', 'SD': '28%', 'AP': '1002hPa', 'njd': '\u6682\u65e0\u5b9e\u51b5', 'WSE': '<3', 'time': '17:55', 'sm': '2.1', 'isRadar': '1', 'Radar': 'JC_RADAR_AZ9010_JB'}}
+>>> wdict = json.loads(data)
+>>> wdict
+>>> wdict['weatherinfo']['city']
+
+
+[root@room8pc16 day04]# pip3 install wget
+>>> import wget
+>>> wget.download('https://upload-images.jianshu.io/upload_images/14715425-24448b60df04d2eb.png')
+
+
+requests模块：底层采用了urllib3，它将http的各种方法都定义成了函数。通过调用函数
+就可以简单的去采用相关的方法访问服务器
+1、安装
+(1) 在线
+# pip3 install requests
+(2) 离线
+# cd requests_pkgs/
+# pip3 install *
+2、使用
+(1) 访问文本页面
+>>> r = requests.get('http://www.sogou.com')
+>>> r.text
+(2) 访问非文内容(图片、视频)
+>>> r = requests.get('https://upload-images.jianshu.io/upload_images/14715425-24448b60df04d2eb.png')
+>>> with open('/tmp/jianshu.png', 'wb') as fobj:
+...     fobj.write(r.content)
+# eog /tmp/jianshu.png
+(3) 访问json格式数据
+>>> r = requests.get('http://www.weather.com.cn/data/zs/101010100.html')
+>>> r.json()
+(4) 字符编码
+>>> r.encoding
+'ISO-8859-1'   # 默认的字符编码无法准确地显示汉字
+>>> r.encoding = 'utf8'
+>>> r.json()
+
+
+查快递
+1、网址：http://www.kuaidi100.com/query?type=%s&postid=%s
+(1) type指定快递公司，如
+'shentong', 'youzhengguonei', 'yuantong', 'shunfeng', 'yunda',
+'zhongtong', "tiantian", "debang"}
+(2) postid指定单号
+2、服务器要求使用get的方式提交参数
+params = {'type': 'youzhengguonei', 'postid': '9893442769997'}
+3、查询
+>>> r = requests.get(url, params=params)
+>>> result = r.json()
+>>> result
+>>> result['data']
+>>> info = result['data']
+>>> info.reverse()
+>>> info
+>>> for line in info:
+...     print(line['time'], line['context'])
+
+
+
+
+
+
+
+
+
