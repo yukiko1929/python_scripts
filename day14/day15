@@ -1,0 +1,87 @@
+import re
+
+#case1:
+# result1 = re.match('www', 'www.runboon.com').span()
+# result2 = re.match('com', 'www.runboon.com')
+# result3 = re.match('www', 'www.runboon.com')
+# result4 = re.search('run', 'www.runboon.com').span()
+# print(result1)
+# print(result2)
+# print(result3)
+# print(result4)
+
+# so by use span() we can get the index of the matched object in a listed-transferred string
+
+#case2:
+# line = 'Cats are smarter than dogs'
+# matchobj = re.match(r'(.*) are (.*?).*', line)
+# if matchobj:
+#     print("matchObj.grop():", matchobj.group())
+#     print("matchObj.grop(1):", matchobj.group(1))
+#     print("matchObj.grop(2):", matchobj.group(2))
+# else:
+#     print('no match')
+
+# line1 = 'the website is http://www.yukiko.cn/ and it updates on 22:22pm everyday'
+# line2 = 'the website is http://www.icuhos.com/ and you can reserve from 10:30 to 12:30'
+# matchobj1 = re.match(r'(.*)\sis\s(http:\/\/(.*)\/)\s.*', line1)
+# if matchobj1:
+#     print(matchobj1.group(2))
+# else:
+#     print('no match')
+
+# def get_address(filename, pattherns):
+#     add_list = []
+#     cpa = re.compile(pattherns)
+#     with open(filename) as fobj:
+#         for line in fobj:
+#             ma = cpa.search(line)
+#             if not ma:
+#                 break
+#             mag = ma.group()
+#             add_list.append(mag)
+#     return add_list
+
+def get_opentime(filename, patterns):
+    # open_time_list = []
+    # close_time_list = []
+    # reserve_time_list = []
+    add_list = []
+    update_list = []
+    cap = re.compile(patterns)
+    with open(filename) as fobj:
+        for line in fobj:
+            ma = cap.search(line)
+            if not ma:
+                break
+            addr = ma.group(1)
+            updata = ma.group(2)
+            add_list.append(addr)
+            update_list.append(updata)
+    #         openg = ma.group(2)
+    #         closeg = ma.group(3)
+    #         reserveg = ma.group(4)
+    #         open_time_list.append(openg)
+    #         close_time_list.append(closeg)
+    #         reserve_time_list.append(reserveg)
+    # return open_time_list, close_time_list, reserve_time_list
+    # print(addr, updata)
+    return add_list, update_list
+
+
+if __name__ == '__main__':
+    # afile = '/mnt/capture'
+    # patt1 = 'http:\/\/.*\/'
+    # result = get_address(afile, patt1)
+    # print(result)
+
+    # all_patt = '.*(http:\/\/.*\/).*([oO]pen.*\d+:\d+\.*).*([cC]lose.*\d+:\d+.*)'
+    bfile = '/mnt/capture'
+    patte = '.*(http:\/\/.*\/).*(update.*\d+:\d+)'
+    result = get_opentime(bfile,patte)
+    print(result)
+
+
+
+
+
